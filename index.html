@@ -20,9 +20,18 @@
       border: 1px solid black;
       padding: 8px;
       text-align: left;
+      cursor: pointer;
+      height: 20px;
     }
 
+    .pointer {
+      cursor: pointer;
+    }
+    
     th {
+      background: linear-gradient(156.8deg, rgb(30, 144, 231) 27.1%, rgb(67, 101, 225) 77.8%);
+    }
+    tr:hover{
       background: linear-gradient(156.8deg, rgb(30, 144, 231) 27.1%, rgb(67, 101, 225) 77.8%);
     }
 
@@ -30,11 +39,12 @@
       margin-bottom: 50px;
       width: 300px;
       height: 40px;
-      margin-top: 10px;
+      margin-top: 20px;
       margin-left: 0 auto;
       border: none;
       border-radius: 5px;
       background: linear-gradient(156.8deg, rgb(30, 144, 231) 27.1%, rgb(67, 101, 225) 77.8%);
+      cursor: pointer;
 
     }
 
@@ -43,24 +53,26 @@
       flex-direction: column;
       align-items: center;
     }
-    .dir-flex{
+
+    .dir-flex {
       display: flex;
       flex-direction: column;
       align-items: center;
       background: linear-gradient(156.8deg, rgb(30, 144, 231) 27.1%, rgb(67, 101, 225) 77.8%);
       top: 50px;
       width: 70%;
-      margin:0 auto;
+      margin: 0 auto;
       position: relative;
     }
   </style>
 </head>
+
 <body>
   <div class="bnt-wrap"></div>
   <table>
     <thead>
       <tr>
-        <th>FileName</th>
+        <th>Directory and filename/dirname</th>
         <th>Type</th>
         <th>Size/bytes</th>
       </tr>
@@ -68,16 +80,16 @@
     <tbody>
       {{range .}}
       <tr>
-        <td href="#">{{.Name}}</td>
-        <td href="#">{{.Typefile}}</td>
-        <td href="#">{{.Size}}</td>
+        <td href="#" class="pointer">{{.Name}}</td>
+        <td href="#" class="pointer">{{.Typefile}}</td>
+        <td href="#" class="pointer">{{.Size}}</td>
       </tr>
       {{end}}
     </tbody>
   </table>
   <div class="bnt-wrap">
     <button href="#">Back</button>
+  </div>
 </body>
-</div>
 
 </html>
