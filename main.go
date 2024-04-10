@@ -1,12 +1,15 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
+	"html/template"
 	"io/fs"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"sort"
@@ -15,21 +18,49 @@ import (
 
 // определение структуры файла
 type file struct {
-	Name      string `json:"name"`
-	Extension string `json:"extension"`
-	Size      int64  `json:"size"`
+	Name     string
+	Typefile string
+	Size     int64
+	Title    string
+}
+
+func templateHTML(tablefiles []file) {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		t, err := template.ParseFiles("index.html")
+		if err != nil {
+			http.Error(w, "Error parsing template: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		err = t.Execute(w, tablefiles)
+		if err != nil {
+			http.Error(w, "Error executing template: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+	})
+	http.ListenAndServe(":8080", nil)
 }
 
 var s []file
 
+// функция которая принимает в качестве аргументов средство записи HTTP-ответа и HTTP-запрос.
+func postHandler(files []file) {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+
+		json.NewEncoder(w).Encode(files)
+	})
+	http.ListenAndServe(":8080", nil)
+}
+
 // определение функции для ввода информации классы Files в консоль
 func (ob *file) print() {
-	fmt.Println("Name:", ob.Name, "Type:", ob.Extension, "FileSize/byte", ob.Size)
+	fmt.Println("Name:", ob.Name, "Type:", ob.Typefile, "FileSize/byte", ob.Size)
 }
 
 // определение функции для получения строк через консоль
 func getFilePathFromCommand(root string, sort string) (string, string, error) {
 	if root == "None" || sort == "None" {
+		fmt.Println("->Введите правильную командную строку:(--root=/pathfile  --sort=Desc) or --root=/pathfile")
+	} else if root == "None" && sort != "" {
 		fmt.Println("->Введите правильную командную строку:(--root=/pathfile  --sort=Desc) or --root=/pathfile")
 	}
 	var sourcepath *string
@@ -61,7 +92,7 @@ func (ob *file) getName() string {
 
 // метод для получения значения Extension класса
 func (ob *file) getExtension() string {
-	return ob.Extension
+	return ob.Typefile
 }
 
 // метод для получение информации о файлах
@@ -96,7 +127,7 @@ func getAllFromDir(path string) ([]file, error) {
 		if err != nil {
 			fmt.Println(err)
 		}
-		element := file{Name: p, Extension: Ext, Size: size}
+		element := file{Name: p, Typefile: Ext, Size: size}
 		s = append(s, element)
 		return nil
 	})
@@ -162,7 +193,7 @@ func getFilesFromDirectory(pathName string) ([]file, error) {
 		}
 		Ext, err := getFileExtension(pathName, item.Name())
 		name := pathName + "/" + f.Name()
-		element := file{Name: name, Extension: Ext, Size: f.Size()}
+		element := file{Name: name, Typefile: Ext, Size: f.Size()}
 		s = append(s, element)
 		fmt.Println(Ext, name, f.Size())
 	}
@@ -248,18 +279,20 @@ func main() {
 					return nil
 				})
 				filesArr = append(filesArr, file{
-					Name:      item.Name(),
-					Extension: "Каталог",
-					Size:      size,
+					Name:     item.Name(),
+					Typefile: "Каталог",
+					Size:     size,
+					Title:    root,
 				})
 				if err != nil {
 					log.Println(err)
 				}
 			case mode.IsRegular():
 				filesArr = append(filesArr, file{
-					Name:      item.Name(),
-					Extension: "Файл",
-					Size:      item.Size(),
+					Name:     item.Name(),
+					Typefile: "Файл",
+					Size:     item.Size(),
+					Title:    root,
 				})
 
 			}
@@ -268,4 +301,9 @@ func main() {
 	}
 	wg.Wait()
 	selectSort(filesArr, root, sort)
+	//postHandler(filesArr)
+	fmt.Println("root", root)
+	templateHTML(filesArr)
+	// http.HandleFunc("/", handler)
+	// http.ListenAndServe(":8080", nil)
 }

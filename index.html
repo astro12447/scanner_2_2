@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <title>File table</title>
+  <style>
+    table {
+      width: 70%;
+      border-collapse: collapse;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 50px;
+    }
+
+    th,
+    td {
+      border: 1px solid black;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background: linear-gradient(156.8deg, rgb(30, 144, 231) 27.1%, rgb(67, 101, 225) 77.8%);
+    }
+
+    button {
+      margin-bottom: 50px;
+      width: 300px;
+      height: 40px;
+      margin-top: 10px;
+      margin-left: 0 auto;
+      border: none;
+      border-radius: 5px;
+      background: linear-gradient(156.8deg, rgb(30, 144, 231) 27.1%, rgb(67, 101, 225) 77.8%);
+
+    }
+
+    .bnt-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <div>/Users/ismaelnvo/Desktop/scanner-post/pathfiles</div>
+  <div class="bnt-wrap"></div>
+  <table>
+    <thead>
+      <tr>
+        <th>FileName</th>
+        <th>Type</th>
+        <th>Size</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .}}
+      <tr>
+        <td>{{.Name}}</td>
+        <td>{{.Typefile}}</td>
+        <td>{{.Size}}</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  <div class="bnt-wrap">
+    <button>Back</button>
+</body>
+</div>
+
+</html>
