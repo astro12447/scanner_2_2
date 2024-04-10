@@ -18,10 +18,10 @@ import (
 
 // определение структуры файла
 type file struct {
-	Name     string
-	Typefile string
-	Size     int64
-	Title    string
+	Name     string `json:"name"`
+	Typefile string `json:"typefile"`
+	Size     int64  `json:"size"`
+	Title    string `json:"title"`
 }
 
 func templateHTML(tablefiles []file) {
@@ -300,9 +300,10 @@ func main() {
 		}(item)
 	}
 	wg.Wait()
+
 	selectSort(filesArr, root, sort)
 	//postHandler(filesArr)
-	fmt.Println("root", root)
+	//fmt.Println("root", root)
 	templateHTML(filesArr)
 	// http.HandleFunc("/", handler)
 	// http.ListenAndServe(":8080", nil)
