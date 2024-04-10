@@ -193,9 +193,9 @@ func getFilesFromDirectory(pathName string) ([]file, error) {
 		}
 		Ext, err := getFileExtension(pathName, item.Name())
 		name := pathName + "/" + f.Name()
+		//filename := f.Name()
 		element := file{Name: name, Typefile: Ext, Size: f.Size()}
 		s = append(s, element)
-		fmt.Println(Ext, name, f.Size())
 	}
 	return s, nil
 }
@@ -302,9 +302,10 @@ func main() {
 	wg.Wait()
 
 	selectSort(filesArr, root, sort)
+	table, err := getFilesFromDirectory(root)
 	//postHandler(filesArr)
 	//fmt.Println("root", root)
-	templateHTML(filesArr)
+	templateHTML(table)
 	// http.HandleFunc("/", handler)
 	// http.ListenAndServe(":8080", nil)
 }

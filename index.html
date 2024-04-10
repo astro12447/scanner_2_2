@@ -56,28 +56,27 @@
   </style>
 </head>
 <body>
-  <div class="dir-flex"><h2>/Users/ismaelnvo/Desktop/scanner-post/pathfiles </h2></div>
   <div class="bnt-wrap"></div>
   <table>
     <thead>
       <tr>
         <th>FileName</th>
         <th>Type</th>
-        <th>Size</th>
+        <th>Size/bytes</th>
       </tr>
     </thead>
     <tbody>
       {{range .}}
       <tr>
-        <td>{{.Name}}</td>
-        <td>{{.Typefile}}</td>
-        <td>{{.Size}}</td>
+        <td href="#">{{.Name}}</td>
+        <td href="#">{{.Typefile}}</td>
+        <td href="#">{{.Size}}</td>
       </tr>
       {{end}}
     </tbody>
   </table>
   <div class="bnt-wrap">
-    <button>Back</button>
+    <button href="#">Back</button>
 </body>
 </div>
 
