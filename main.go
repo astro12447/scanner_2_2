@@ -96,12 +96,12 @@ func (ob *file) getExtension() string {
 }
 
 // метод для получение информации о файлах
-func getFilesRecurvise(path string) (bool, error) {
-	_, err := os.Stat(path)
+func getFilesRecurvise(path string) (fs.FileInfo, error) {
+	info, err := os.Stat(path)
 	if err != nil {
 		panic(err)
 	}
-	return true, nil
+	return info, nil
 }
 
 // метод для получение информации католога файлы
