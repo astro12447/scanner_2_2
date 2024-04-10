@@ -40,8 +40,6 @@ func templateHTML(tablefiles []file) {
 	http.ListenAndServe(":8080", nil)
 }
 
-var s []file
-
 // функция которая принимает в качестве аргументов средство записи HTTP-ответа и HTTP-запрос.
 func postHandler(files []file) {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -114,6 +112,7 @@ func getFileLocation(root string, filename string) (string, error) {
 
 // Получение все файл из котолога
 func getAllFromDir(path string) ([]file, error) {
+	var arrFiles []file
 	err := filepath.Walk(path, func(p string, inf os.FileInfo, err error) error {
 		if err != nil {
 			fmt.Println(err)
@@ -128,13 +127,13 @@ func getAllFromDir(path string) ([]file, error) {
 			fmt.Println(err)
 		}
 		element := file{Name: p, Typefile: Ext, Size: size}
-		s = append(s, element)
+		arrFiles = append(arrFiles, element)
 		return nil
 	})
 	if err != nil {
 		fmt.Println(err)
 	}
-	return s, nil
+	return arrFiles, nil
 }
 
 // функция для получения значения  size
@@ -176,6 +175,7 @@ func getFileExtension2(filename string) (string, error) {
 
 // функция для получения значения  файлы из католога
 func getFilesFromDirectory(pathName string) ([]file, error) {
+	var arrFiles []file
 	fi, err := os.Open(pathName)
 	if err != nil {
 		log.Fatal(err, fi.Name())
@@ -195,9 +195,9 @@ func getFilesFromDirectory(pathName string) ([]file, error) {
 		name := pathName + "/" + f.Name()
 		//filename := f.Name()
 		element := file{Name: name, Typefile: Ext, Size: f.Size()}
-		s = append(s, element)
+		arrFiles = append(arrFiles, element)
 	}
-	return s, nil
+	return arrFiles, nil
 }
 
 // функция для Обработки сортировки по Убывающий
@@ -308,4 +308,5 @@ func main() {
 	templateHTML(table)
 	// http.HandleFunc("/", handler)
 	// http.ListenAndServe(":8080", nil)
+
 }
