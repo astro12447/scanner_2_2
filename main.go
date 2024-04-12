@@ -37,6 +37,7 @@ func fletchHandler(table []functions.File) {
 	})
 }
 
+// Настройка Сервера
 func listenAndServer(addr string) {
 	log.Println("Сервер работает на порту 8080...")
 	log.Fatal(http.ListenAndServe(addr, nil))
@@ -63,6 +64,7 @@ func main() {
 
 	fletchHandler(table)
 	templateHTML(table)
+
 	go func() {
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
@@ -71,5 +73,4 @@ func main() {
 		os.Exit(0)
 	}()
 	listenAndServer(":8080")
-
 }

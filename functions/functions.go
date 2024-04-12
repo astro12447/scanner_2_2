@@ -39,13 +39,15 @@ type Root struct {
 // Реализация метода(GetsubDir) интерфейса
 func (root *Root) GetSubDir() ([]File, error) {
 	var files []File
+	var size int64 = 0
 	filepath.Walk(root.Name, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return nil
 		}
 		switch mode := info.Mode(); {
 		case mode.IsDir():
-			files = append(files, Newfile("Каталог", path, info.Size()))
+			size += info.Size()
+			files = append(files, Newfile("Каталог", path, size))
 		case mode.IsRegular():
 			files = append(files, Newfile("Файл", path, info.Size()))
 		}
