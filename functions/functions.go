@@ -39,7 +39,7 @@ type Root struct {
 	Name string
 }
 
-// имплементация метода интерфейса
+// реализация метода(GetsubDir) интерфейса
 func (root *Root) GetSubDir() ([]File, error) {
 	var files []File
 	filepath.Walk(root.Name, func(path string, info fs.FileInfo, err error) error {
