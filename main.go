@@ -65,9 +65,9 @@ func main() {
 
 	// Manejador para servir archivos estáticos
 	//http.Handle("/static/", http.StripPrefix("/static/", fs))
-	path := functions.Dirname{Name: root}
+	path := functions.Root{Name: root}
 	subDir := path
-	table, err := subDir.GetsubDir()
+	table, err := subDir.GetDir()
 	if err != nil {
 		fmt.Println(err)
 	}

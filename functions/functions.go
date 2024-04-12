@@ -35,14 +35,14 @@ type ReadPath interface {
 }
 
 // структур папки
-type Dirname struct {
+type Root struct {
 	Name string
 }
 
 // имплементация метода интерфейса
-func (dir *Dirname) GetsubDir() ([]File, error) {
+func (root *Root) GetDir() ([]File, error) {
 	var files []File
-	filepath.Walk(dir.Name, func(path string, info fs.FileInfo, err error) error {
+	filepath.Walk(root.Name, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return nil
 		}
