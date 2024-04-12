@@ -20,7 +20,7 @@ type File struct {
 	Size     int64  `json:"size"`
 }
 
-// Метод для создания нового файла
+// Метод для создания структурой файла
 func Newfile(typefile string, name string, size int64) File {
 	return File{
 		Typefile: typefile,
@@ -34,7 +34,7 @@ type ReadPath interface {
 	GetsubDir(root string) ([]File, error)
 }
 
-// Структур папки
+// Папка структуры
 type Root struct {
 	Name string
 }
@@ -73,14 +73,6 @@ func ListenAndServer(addr string) {
 	log.Println("Сервер работает на порту 8080...")
 	http.ListenAndServe(addr, nil)
 }
-
-// func listenAndServer(addr string , handler http.Handler) error {
-// 	err := http.ListenAndServe(addr, handler)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
 
 // функция которая принимает в качестве аргументов средство записи HTTP-ответа и HTTP-запрос.
 func FletchHandler(table []File) {
