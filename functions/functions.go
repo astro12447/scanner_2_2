@@ -29,17 +29,17 @@ func Newfile(typefile string, name string, size int64) File {
 	}
 }
 
-// интерфейс(ReadPath) с методом для считания root
+// Интерфейс(ReadPath) с методом для считания root
 type ReadPath interface {
 	GetsubDir(root string) ([]File, error)
 }
 
-// структур папки
+// Структур папки
 type Root struct {
 	Name string
 }
 
-// реализация метода(GetsubDir) интерфейса
+// Реализация метода(GetsubDir) интерфейса
 func (root *Root) GetSubDir() ([]File, error) {
 	var files []File
 	filepath.Walk(root.Name, func(path string, info fs.FileInfo, err error) error {
