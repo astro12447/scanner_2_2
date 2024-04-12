@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./styles.css">
+  <title>File table</title>
+</head>
+
+<body>
+  <div class="bnt-wrap"></div>
+  <div class="bnt-wrap">
+    <button href="#">Back</button>
+  </div>
+  <table id="filesTable">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Root and Dirname/Filename</th>
+        <th>Size/bytes</th>
+      </tr>
+    </thead>
+    <tbody id="filesTableBody">
+     
+    </tbody>
+  </table>
+  <script>
+  
+    fetch('http://localhost:8080/files')
+      .then(response => response.json())
+      .then(data => {
+        const filesTableBody = document.getElementById('filesTableBody')
+        // Получение элементы, в которых вы хотите отображать данные.
+        data.forEach(file => {
+          const row = document.createElement('tr')
+          // Создайте ячейки для каждого свойства пользователя.
+          const nameCell = document.createElement('td');
+          nameCell.textContent = file.name;
+
+          const typefileCell = document.createElement('td');
+          typefileCell.textContent = file.typefile;
+
+          const sizelCell = document.createElement('td');
+          sizelCell.textContent = file.size;
+          // Добавить ячейки в строку
+          row.appendChild(typefileCell);
+          row.appendChild(nameCell);
+          row.appendChild(sizelCell);
+          // Добавить строку в тело таблицы
+          filesTableBody.appendChild(row);
+        });
+
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    
+  </script>
+</body>
+
+</html>

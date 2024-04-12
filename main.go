@@ -1,273 +1,35 @@
 package main
 
 import (
-	"encoding/json"
-	"errors"
-	"flag"
 	"fmt"
-	"html/template"
-	"io/fs"
-	"io/ioutil"
-	"log"
+	"functions/functions"
 	"net/http"
 	"os"
 	"path/filepath"
-	"sort"
 	"sync"
 )
 
 // определение структуры файла
-type file struct {
-	Name     string `json:"name"`
-	Typefile string `json:"typefile"`
-	Size     int64  `json:"size"`
-	Title    string `json:"title"`
-}
-
-func templateHTML(tablefiles []file) {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		t, err := template.ParseFiles("index.html")
-		if err != nil {
-			http.Error(w, "Error parsing template: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-		err = t.Execute(w, tablefiles)
-		if err != nil {
-			http.Error(w, "Error executing template: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-	})
-	http.ListenAndServe(":8080", nil)
-}
-
-// функция которая принимает в качестве аргументов средство записи HTTP-ответа и HTTP-запрос.
-func postHandler(files []file) {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-
-		json.NewEncoder(w).Encode(files)
-	})
-	http.ListenAndServe(":8080", nil)
-}
-
-// определение функции для ввода информации классы Files в консоль
-func (ob *file) print() {
-	fmt.Println("Name:", ob.Name, "Type:", ob.Typefile, "FileSize/byte", ob.Size)
-}
-
-// определение функции для получения строк через консоль
-func getFilePathFromCommand(root string, sort string) (string, string, error) {
-	if root == "None" || sort == "None" {
-		fmt.Println("->Введите правильную командную строку:(--root=/pathfile  --sort=Desc) or --root=/pathfile")
-	} else if root == "None" && sort != "" {
-		fmt.Println("->Введите правильную командную строку:(--root=/pathfile  --sort=Desc) or --root=/pathfile")
-	}
-	var sourcepath *string
-	var sortflag *string
-	sourcepath = flag.String(root, "None", "")
-	sortflag = flag.String(sort, "None", "")
-	flag.Parse()
-	return *sourcepath, *sortflag, nil
-}
-
-// функция для проверкаи попки
-func rootExist(root string) (bool, error) {
-	_, err := os.Stat(root)
-	if os.IsNotExist(err) {
-		fmt.Println("Root не существует...!")
-	}
-	return true, nil
-}
-
-// метод для получения значения size класса
-func (ob *file) getSize() int64 {
-	return ob.Size
-}
-
-// метод для получения значения name класса
-func (ob *file) getName() string {
-	return ob.Name
-}
-
-// метод для получения значения Extension класса
-func (ob *file) getExtension() string {
-	return ob.Typefile
-}
-
-// метод для получение информации о файлах
-func getFilesRecurvise(path string) (fs.FileInfo, error) {
-	info, err := os.Stat(path)
-	if err != nil {
-		panic(err)
-	}
-	return info, nil
-}
-
-// метод для получение информации католога файлы
-func getFileLocation(root string, filename string) (string, error) {
-	if root == "" {
-		return "", errors.New("Root  пуст!")
-	}
-	return root + "/" + filename, nil
-}
-
-// Получение все файл из котолога
-func getAllFromDir(path string) ([]file, error) {
-	var arrFiles []file
-	err := filepath.Walk(path, func(p string, inf os.FileInfo, err error) error {
-		if err != nil {
-			fmt.Println(err)
-			return err
-		}
-		size, err := getsize(p)
-		if err != nil {
-			fmt.Println(err)
-		}
-		Ext, err := getFileExtension2(p)
-		if err != nil {
-			fmt.Println(err)
-		}
-		element := file{Name: p, Typefile: Ext, Size: size}
-		arrFiles = append(arrFiles, element)
-		return nil
-	})
-	if err != nil {
-		fmt.Println(err)
-	}
-	return arrFiles, nil
-}
-
-// функция для получения значения  size
-func getsize(filename string) (int64, error) {
-	f, err := os.Stat(filename)
-	if err != nil {
-		fmt.Println(err)
-	}
-	return f.Size(), nil
-}
-
-// функция для получения значения  Extension
-func getFileExtension(root string, filename string) (string, error) {
-	f, err := getFileLocation(root, filename)
-	if err != nil {
-		fmt.Println(err)
-	}
-	st, err := os.Stat(f)
-	if err != nil {
-		fmt.Println(err)
-	}
-	if st.IsDir() {
-		return "Каталог", nil
-	}
-	return "файл", nil
-}
-
-// функция для получения значения  Extension2
-func getFileExtension2(filename string) (string, error) {
-	f, err := os.Stat(filename)
-	if err != nil {
-		fmt.Println(err)
-	}
-	if f.IsDir() {
-		return "Каталог", nil
-	}
-	return "файл", nil
-}
-
-// функция для получения значения  файлы из католога
-func getFilesFromDirectory(pathName string) ([]file, error) {
-	var arrFiles []file
-	fi, err := os.Open(pathName)
-	if err != nil {
-		log.Fatal(err, fi.Name())
-	}
-	defer fi.Close()
-	files, err := os.ReadDir(pathName)
-	if err != nil {
-		fmt.Print("Невозможно прочитать каталога!", err)
-	}
-	for _, item := range files {
-		p, err := getFileLocation(pathName, item.Name())
-		f, err := os.Stat(p)
-		if err != nil {
-			panic(err)
-		}
-		Ext, err := getFileExtension(pathName, item.Name())
-		name := pathName + "/" + f.Name()
-		//filename := f.Name()
-		element := file{Name: name, Typefile: Ext, Size: f.Size()}
-		arrFiles = append(arrFiles, element)
-	}
-	return arrFiles, nil
-}
-
-// функция для Обработки сортировки по Убывающий
-func sortAsc(arr []file) {
-	if len(arr) < 0 {
-		fmt.Println("Массив пуст!")
-	}
-	sort.Slice(arr, func(i, j int) bool {
-		return arr[i].Size < arr[j].Size
-	})
-}
-
-// функция для Обработки сортировки по возврастающий
-func sortDesc(arr []file) {
-	if len(arr) < 0 {
-		fmt.Println("Массив пуст!")
-	}
-	sort.Slice(arr, func(i, j int) bool {
-		return arr[i].Size > arr[j].Size
-	})
-}
-
-// Чтение файлы из католога(Root)
-func getInfo(root string) ([]fs.FileInfo, error) {
-	arrayfiles, err := ioutil.ReadDir(root)
-	if err != nil {
-		panic(err)
-	}
-	return arrayfiles, nil
-}
-
-// выборка сортировки
-func selectSort(struc []file, root string, sortMode string) error {
-	if len(struc) < 0 {
-		log.Panic("Нет элементов в массиве!")
-	}
-	if root != "None" && sortMode == "None" {
-		sortAsc(struc)
-		for i := 0; i < len(struc); i++ {
-			struc[i].print()
-		}
-	} else if sortMode == "Desc" && root != "None" {
-		sortDesc(struc)
-		for i := 0; i < len(struc); i++ {
-			struc[i].print()
-		}
-	}
-	return nil
-}
 func main() {
 	rootflag := "root"
 	sortflag := "sort"
-	root, sort, err := getFilePathFromCommand(rootflag, sortflag)
+	root, sort, err := functions.GetFilePathFromCommand(rootflag, sortflag)
 	if err != nil {
 		fmt.Println(err)
 	}
-	arrayfiles, err := getInfo(root)
+	arrayfiles, err := functions.GetInfo(root)
+
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	filesArr := []file{}
+
+	fileStructArray := []functions.File{}
 	var wg sync.WaitGroup
 	for _, item := range arrayfiles {
 		wg.Add(1)
 		go func(item os.FileInfo) {
 			defer wg.Done()
-			if err != nil {
-				fmt.Println(err)
-			}
 			switch mode := item.Mode(); {
 			case mode.IsDir():
 				var size int64 = 0
@@ -278,35 +40,40 @@ func main() {
 					size += info.Size()
 					return nil
 				})
-				filesArr = append(filesArr, file{
-					Name:     item.Name(),
-					Typefile: "Каталог",
-					Size:     size,
-					Title:    root,
-				})
+				fileStructArray = append(fileStructArray, functions.Newfile(item.Name(), "Каталог", size))
 				if err != nil {
-					log.Println(err)
+					fmt.Println(err)
 				}
 			case mode.IsRegular():
-				filesArr = append(filesArr, file{
-					Name:     item.Name(),
-					Typefile: "Файл",
-					Size:     item.Size(),
-					Title:    root,
-				})
-
+				fileStructArray = append(fileStructArray, functions.Newfile(item.Name(), "Файл", item.Size()))
 			}
 
 		}(item)
 	}
 	wg.Wait()
+	functions.SelectSort(fileStructArray, root, sort)
+	//http.Handle("/", http.FileServer(http.Dir("./static")))
+	//table := functions.GetFilesFromDirectory(root)
+	// Create a new ServeMux
+	mux := http.NewServeMux()
+	//Serve static files from the "static" directory
+	//fileServer := http.FileServer(http.Dir("../ui"))
+	mux.Handle("/ui/", http.StripPrefix("/ui/static/", http.FileServer(http.Dir("../ui/static"))))
+	//staticDir := "./static"
+	// Servir archivos estáticos desde el directorio especificado
+	//fs := http.FileServer(http.Dir(staticDir))
 
-	selectSort(filesArr, root, sort)
-	table, err := getFilesFromDirectory(root)
-	//postHandler(filesArr)
-	//fmt.Println("root", root)
-	templateHTML(table)
-	// http.HandleFunc("/", handler)
-	// http.ListenAndServe(":8080", nil)
+	// Manejador para servir archivos estáticos
+	//http.Handle("/static/", http.StripPrefix("/static/", fs))
+	path := functions.Dirname{Name: root}
+	subDir := path
+	table, err := subDir.GetsubDir()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	functions.FletchHandler(table)
+	functions.TemplateHTML(table)
+	functions.ListenAndServer(":8080")
 
 }
