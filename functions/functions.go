@@ -20,7 +20,7 @@ type File struct {
 	Size     int64  `json:"size"`
 }
 
-// метод для создания нового файла
+// Метод для создания нового файла
 func Newfile(typefile string, name string, size int64) File {
 	return File{
 		Typefile: typefile,

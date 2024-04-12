@@ -91,7 +91,7 @@
         // Получение элементы, в которых вы хотите отображать данные.
         data.forEach(file => {
           const row = document.createElement('tr')
-          // Создайте ячейки для каждого свойства пользователя.
+          // Создание ячейки для каждого свойства пользователя.
           const nameCell = document.createElement('td');
           nameCell.textContent = file.name;
 
@@ -100,11 +100,11 @@
 
           const sizelCell = document.createElement('td');
           sizelCell.textContent = file.size;
-          // Добавить ячейки в строку
+          // Добавление ячейки в строку
           row.appendChild(typefileCell);
           row.appendChild(nameCell);
           row.appendChild(sizelCell);
-          // Добавить строку в тело таблицы
+          // Добавление строки в тело таблицы
           filesTableBody.appendChild(row);
         });
 
