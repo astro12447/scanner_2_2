@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./styles.css" type="text/css">
   <title>File table</title>
 </head>
 <style>
@@ -27,11 +28,12 @@
   .pointer {
     cursor: pointer;
   }
-  
+
   th {
     background: linear-gradient(156.8deg, rgb(30, 144, 231) 27.1%, rgb(67, 101, 225) 77.8%);
   }
-  tr:hover{
+
+  tr:hover {
     background: linear-gradient(156.8deg, rgb(30, 144, 231) 27.1%, rgb(67, 101, 225) 77.8%);
   }
 
@@ -65,6 +67,7 @@
     position: relative;
   }
 </style>
+
 <body>
   <div class="bnt-wrap"></div>
   <div class="bnt-wrap">
@@ -79,11 +82,11 @@
       </tr>
     </thead>
     <tbody id="filesTableBody">
-     
+
     </tbody>
   </table>
   <script>
-  
+
     fetch('http://localhost:8080/files')
       .then(response => response.json())
       .then(data => {
@@ -112,6 +115,43 @@
       .catch(error => {
         console.error('Error:', error);
       });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      var table = document.getElementById("filesTable");
+      var rows = table.getElementsByTagName("tr");
+
+      for (var i = 0; i < rows.length; i++) {
+        var cells = rows[i].getElementsByTagName("td");
+
+        for (var j = 0; j < cells.length; j++) {
+          cells[j].addEventListener("click", function () {
+            var cell = event.target;
+            var row = cell.parentNode;
+            var cells = row.getElementsByTagName("td");
+
+            var data = [];
+            for (var k = 0; k < cells.length; k++) {
+              data.push(cells[k].innerHTML);
+            }
+
+            fetch("/api/datos", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify(data)
+            })
+              .then(response => response.json())
+              .then(data => {
+                console.log(data);
+              })
+              .catch(error => {
+                console.error('Error:', error);
+              });
+          });
+        }
+      }
+    });
     
   </script>
 </body>

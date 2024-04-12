@@ -1,13 +1,10 @@
 package functions
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
-	"html/template"
 	"io/fs"
 	"log"
-	"net/http"
 	"os"
 	"path/filepath"
 	"sort"
@@ -55,34 +52,6 @@ func (root *Root) GetSubDir() ([]File, error) {
 		return nil
 	})
 	return files[1:len(files)], nil
-}
-func TemplateHTML(tablefiles []File) {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		templ, err := template.ParseFiles("ui/static/index.html")
-		if err != nil {
-			http.Error(w, "Ошибка анализа шаблона:"+err.Error(), http.StatusInternalServerError)
-			return
-		}
-		if err = templ.Execute(w, tablefiles); err != nil {
-			http.Error(w, "Ошибка выполнения шаблона:"+err.Error(), http.StatusInternalServerError)
-			return
-		}
-	})
-}
-func ListenAndServer(addr string) {
-	log.Println("Сервер работает на порту 8080...")
-	http.ListenAndServe(addr, nil)
-}
-
-// функция которая принимает в качестве аргументов средство записи HTTP-ответа и HTTP-запрос.
-func FletchHandler(table []File) {
-	http.HandleFunc("/files", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(table); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	})
 }
 
 // определение функции для ввода информации классы Files в консоль

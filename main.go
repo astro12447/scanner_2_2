@@ -1,70 +1,59 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"functions/functions"
+	"html/template"
+	"log"
 	"net/http"
 	"os"
-	"path/filepath"
-	"sync"
+	"os/signal"
+	"syscall"
 )
+
+func templateHTML(tablefiles []functions.File) {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		templ, err := template.ParseFiles("ui/static/index.html")
+		if err != nil {
+			http.Error(w, "Ошибка анализа шаблона:"+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if err = templ.Execute(w, tablefiles); err != nil {
+			http.Error(w, "Ошибка выполнения шаблона:"+err.Error(), http.StatusInternalServerError)
+			return
+		}
+	})
+}
+
+// функция которая принимает в качестве аргументов средство записи HTTP-ответа и HTTP-запрос.
+func fletchHandler(table []functions.File) {
+	http.HandleFunc("/files", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(table); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	})
+}
+
+func listenAndServer(addr string) {
+	log.Println("Сервер работает на порту 8080...")
+	log.Fatal(http.ListenAndServe(addr, nil))
+}
 
 // определение структуры файла
 func main() {
 	rootflag := "root"
 	sortflag := "sort"
-	root, sort, err := functions.GetFilePathFromCommand(rootflag, sortflag)
+	root, _, err := functions.GetFilePathFromCommand(rootflag, sortflag)
 	if err != nil {
 		fmt.Println(err)
 	}
-	arrayfiles, err := functions.GetInfo(root)
 
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	fileStructArray := []functions.File{}
-	var wg sync.WaitGroup
-	for _, item := range arrayfiles {
-		wg.Add(1)
-		go func(item os.FileInfo) {
-			defer wg.Done()
-			switch mode := item.Mode(); {
-			case mode.IsDir():
-				var size int64 = 0
-				err := filepath.Walk(item.Name(), func(path string, info os.FileInfo, err error) error {
-					if err != nil {
-						return err
-					}
-					size += info.Size()
-					return nil
-				})
-				fileStructArray = append(fileStructArray, functions.Newfile(item.Name(), "Каталог", size))
-				if err != nil {
-					fmt.Println(err)
-				}
-			case mode.IsRegular():
-				fileStructArray = append(fileStructArray, functions.Newfile(item.Name(), "Файл", item.Size()))
-			}
-
-		}(item)
-	}
-	wg.Wait()
-	functions.SelectSort(fileStructArray, root, sort)
-	//http.Handle("/", http.FileServer(http.Dir("./static")))
-	//table := functions.GetFilesFromDirectory(root)
-	// Create a new ServeMux
 	mux := http.NewServeMux()
-	//Serve static files from the "static" directory
-	//fileServer := http.FileServer(http.Dir("../ui"))
 	mux.Handle("/ui/", http.StripPrefix("/ui/static/", http.FileServer(http.Dir("../ui/static"))))
-	//staticDir := "./static"
-	// Servir archivos estáticos desde el directorio especificado
-	//fs := http.FileServer(http.Dir(staticDir))
 
-	// Manejador para servir archivos estáticos
-	//http.Handle("/static/", http.StripPrefix("/static/", fs))
 	path := functions.Root{Name: root}
 	Dirpath := path
 	table, err := Dirpath.GetSubDir()
@@ -72,8 +61,15 @@ func main() {
 		fmt.Println(err)
 	}
 
-	functions.FletchHandler(table)
-	functions.TemplateHTML(table)
-	functions.ListenAndServer(":8080")
+	fletchHandler(table)
+	templateHTML(table)
+	go func() {
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
+		<-c
+		fmt.Println("Закрытие сервера...")
+		os.Exit(0)
+	}()
+	listenAndServer(":8080")
 
 }
